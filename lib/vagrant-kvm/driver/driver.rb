@@ -176,7 +176,6 @@ module VagrantPlugins
             current = definition.hosts.find do |host|
               host[:mac] == new_host[:mac] ||
                 host[:mac] == new_host[:mac] ||
-                host[:ip] == new_host[:ip] ||
                 host[:name] == new_host[:name]
             end
             op = if current
