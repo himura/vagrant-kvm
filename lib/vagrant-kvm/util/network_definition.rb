@@ -53,7 +53,7 @@ module VagrantPlugins
           @range = config.fetch(:range, @range)
 
           # config[:hosts] needs deep merge.
-          hosts_mac_map = @hosts.inject({}) do |host, stow|
+          hosts_mac_map = @hosts.inject({}) do |stow, host|
             stow[host[:mac]] = host
             stow
           end
