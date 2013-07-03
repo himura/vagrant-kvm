@@ -53,14 +53,13 @@ module VagrantPlugins
           @range = config.fetch(:range, @range)
 
           # config[:hosts] needs deep merge.
-          hosts_mac_map = @hosts.inject({}) do |stow, host|
-            stow[host[:mac]] = host
-            stow
+          new_hosts = config[:hosts].dup
+          @hosts.each do |host|
+            unless new_hosts.find{|h| h[:mac] == host[:mac] || h[:name] == host[:name] }
+              new_hosts << host
+            end
           end
-          (config[:hosts] || []).each do |host|
-            hosts_mac_map[host[:mac]] = host
-          end
-          @hosts = hosts_mac_map.values
+          @hosts = new_hosts
         end
 
         def as_xml
