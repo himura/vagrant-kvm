@@ -45,20 +45,21 @@ module VagrantPlugins
         end
 
         def configure(config)
-          config = {
-            :forward => @forward,
-            :domain_name => @domain_name,
-            :base_ip => @base_ip,
-            :netmask => @netmask,
-            :range => @range,
-            :hosts => @hosts}.merge(config)
+          @forward = config.fetch(:forward, @forward)
+          @domain_name = config.fetch(:domain_name, @domain_name)
+          @base_ip = config.fetch(:base_ip, @base_ip)
+          @netmask = config.fetch(:netmask, @netmask)
+          @range = config.fetch(:range, @range)
 
-            @forward = config[:forward]
-            @domain_name = config[:domain_name]
-            @base_ip = config[:base_ip]
-            @netmask = config[:netmask]
-            @range = config[:range]
-            @hosts = config[:hosts]
+          # config[:hosts] needs deep merge.
+          hosts_mac_map = @hosts.inject({}) do |host, stow|
+            stow[host[:mac]] = host
+            stow
+          end
+          (config[:hosts] || []).each do |host|
+            hosts_mac_map[host[:mac]] = host
+          end
+          @hosts = hosts_mac_map.values
         end
 
         def as_xml
