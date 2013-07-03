@@ -172,31 +172,30 @@ module VagrantPlugins
 
           # libvirt ruby binding does not support virNetworkUpdate API.
           # so, use virsh net-update instead of libvirt bindings.
-          config[:hosts].each do |new_host|
-            current = definition.hosts.find do |host|
-              host[:mac] == new_host[:mac] ||
-                host[:mac] == new_host[:mac] ||
-                host[:name] == new_host[:name]
-            end
-            op = if current
-                   if current == new_host
-                     nil # do nothing
-                   else
-                     'modify'
-                   end
-                 else
-                   'add-last'
-                 end
-            if op
-              cmdargs = %w"virsh -c qemu:///system net-update vagrant"
-              cmdargs.push op
-              cmdargs.push "ip-dhcp-host"
-              cmdargs.push definition.make_host_xml(new_host)
-              cmdargs.push "--live" if @network.active?
-              cmdargs.push "--config"
 
-              system(*cmdargs)
-            end
+          # clear current setting
+          definition.each_host do |host|
+            cmdargs = %w"virsh -c qemu:///system net-update vagrant"
+            cmdargs.push "delete"
+            cmdargs.push "ip-dhcp-host"
+            cmdargs.push definition.make_host_xml(host)
+            cmdargs.push "--live" if @network.active?
+            cmdargs.push "--config"
+
+            system(*cmdargs)
+          end
+
+          definition.configure(config)
+
+          definition.each_host do |host|
+            cmdargs = %w"virsh -c qemu:///system net-update vagrant"
+            cmdargs.push "add"
+            cmdargs.push "ip-dhcp-host"
+            cmdargs.push definition.make_host_xml(host)
+            cmdargs.push "--live" if @network.active?
+            cmdargs.push "--config"
+
+            system(*cmdargs)
           end
         end
 
