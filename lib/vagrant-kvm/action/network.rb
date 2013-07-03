@@ -39,8 +39,8 @@ module VagrantPlugins
           end
 
           hosts = []
-          name = env[:machine].provider_config.name ?
-                      env[:machine].provider_config.name : "default"
+          name = env[:machine].provider_config.name ||
+            env[:machine].name || "default_#{Time.now.to_i}"
 
           mac = env[:machine].provider.driver.read_mac_address
           @logger.info("Setting the MAC address of the VM: #{mac}")
