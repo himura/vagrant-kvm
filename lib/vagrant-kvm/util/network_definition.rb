@@ -9,6 +9,7 @@ module VagrantPlugins
         attr_reader :name
         attr_reader :domain_name
         attr_reader :base_ip
+        attr_reader :hosts
 
         def initialize(name, definition=nil)
           @name = name
@@ -96,11 +97,20 @@ module VagrantPlugins
           doc = Nokogiri::XML(xml)
           entry_point = doc.at_css("network ip dhcp range")
           @hosts.each do |host|
-            entry_point.add_next_sibling "<host mac='#{host[:mac]}' name='#{host[:name]}' ip='#{host[:ip]}' />"
+            entry_point.add_next_sibling make_host_xml(host)
           end
           doc.to_xml
         end
 
+        def make_host_xml(host)
+          "<host mac='#{host[:mac]}' name='#{host[:name]}' ip='#{host[:ip]}' />"
+        end
+
+        def each_host(&block)
+          @hosts.each do |host|
+            block.call(host)
+          end
+        end
       end
     end
   end

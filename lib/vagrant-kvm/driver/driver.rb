@@ -151,19 +151,54 @@ module VagrantPlugins
         def create_network(config)
           begin
             # Get the network if it exists
-            @network = @conn.lookup_network_by_name(@network_name)
-            definition = Util::NetworkDefinition.new(@network_name,
-                                                     @network.xml_desc)
-            @network.destroy if @network.active?
-            @network.undefine
+            update_network(config)
+            # @network.destroy if @network.active?
+            # @network.undefine
           rescue Libvirt::RetrieveError
             # Network doesn't exist, create with defaults
             definition = Util::NetworkDefinition.new(@network_name)
+            definition.configure(config)
+            @network = @conn.define_network_xml(definition.as_xml)
+            @logger.info("Creating network #{@network_name}")
+            @network.create
           end
-          definition.configure(config)
-          @network = @conn.define_network_xml(definition.as_xml)
-          @logger.info("Creating network #{@network_name}")
-          @network.create
+        end
+
+        def update_network(config)
+          # Get the network if it exists
+          @network = @conn.lookup_network_by_name(@network_name)
+          definition = Util::NetworkDefinition.new(@network_name,
+                                                   @network.xml_desc)
+
+          # libvirt ruby binding does not support virNetworkUpdate API.
+          # so, use virsh net-update instead of libvirt bindings.
+          config[:hosts].each do |new_host|
+            current = definition.hosts.find do |host|
+              host[:mac] == new_host[:mac] ||
+                host[:mac] == new_host[:mac] ||
+                host[:ip] == new_host[:ip] ||
+                host[:name] == new_host[:name]
+            end
+            op = if current
+                   if current == new_host
+                     nil # do nothing
+                   else
+                     'modify'
+                   end
+                 else
+                   'add-last'
+                 end
+            if op
+              cmdargs = %w"virsh -c qemu:///system net-update vagrant"
+              cmdargs.push op
+              cmdargs.push "ip-dhcp-host"
+              cmdargs.push definition.make_host_xml(new_host)
+              cmdargs.push "--live" if @network.active?
+              cmdargs.push "--config"
+
+              system(*cmdargs)
+            end
+          end
         end
 
         # Initialize or create storage pool
