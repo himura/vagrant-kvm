@@ -41,8 +41,12 @@ module VagrantPlugins
           hosts = []
           name = env[:machine].provider_config.name ?
                       env[:machine].provider_config.name : "default"
+
+          mac = env[:machine].provider.driver.read_mac_address
+          @logger.info("Setting the MAC address of the VM: #{mac}")
+
           hosts << {
-            :mac => format_mac(env[:machine].config.vm.base_mac),
+            :mac => format_mac(mac),
             :name => name,
             :ip => options[:ip]
           }

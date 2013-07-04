@@ -16,6 +16,9 @@ module VagrantPlugins
       # @return [Hash]
       attr_reader :network_adapters
 
+      # @return [Boolean]
+      attr_accessor :ignore_base_mac
+
       def initialize
         @name             = UNSET_VALUE
       end

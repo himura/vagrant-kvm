@@ -108,7 +108,7 @@ module VagrantPlugins
             :cpus => @cpus,
             :arch => @arch,
             :disk => @disk,
-            :mac => format_mac(@mac),
+            :mac => @mac ? format_mac(@mac) : nil,
             :network => @network,
             :qemu_bin => qemu_bin.detect { |binary| File.exists? binary }
           })
@@ -121,6 +121,10 @@ module VagrantPlugins
 
         def set_mac(mac)
           @mac = format_mac(mac)
+        end
+
+        def clear_mac
+          @mac = nil
         end
 
         # Takes a quantity and a unit
