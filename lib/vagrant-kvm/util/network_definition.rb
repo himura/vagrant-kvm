@@ -55,7 +55,7 @@ module VagrantPlugins
           # config[:hosts] needs deep merge.
           new_hosts = config[:hosts].dup
           @hosts.each do |host|
-            unless new_hosts.find{|h| h[:mac] == host[:mac] || h[:name] == h[:name] }
+            unless new_hosts.find{|h| h[:mac] == host[:mac] || h[:name] == host[:name] }
               new_hosts << host
             end
           end
