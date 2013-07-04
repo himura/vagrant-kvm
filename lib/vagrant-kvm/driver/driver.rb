@@ -236,10 +236,24 @@ module VagrantPlugins
           @name = name
         end
 
+        def read_mac_address
+          domain = @conn.lookup_domain_by_uuid(@uuid)
+          definition = Util::VmDefinition.new(domain.xml_desc, 'libvirt')
+          definition.mac
+        end
+
         def set_mac_address(mac)
           domain = @conn.lookup_domain_by_uuid(@uuid)
           definition = Util::VmDefinition.new(domain.xml_desc, 'libvirt')
           definition.set_mac(mac)
+          domain.undefine
+          @conn.define_domain_xml(definition.as_libvirt)
+        end
+
+        def clear_mac_address
+          domain = @conn.lookup_domain_by_uuid(@uuid)
+          definition = Util::VmDefinition.new(domain.xml_desc, 'libvirt')
+          definition.clear_mac
           domain.undefine
           @conn.define_domain_xml(definition.as_libvirt)
         end

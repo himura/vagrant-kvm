@@ -34,7 +34,7 @@
       <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x0'/>
     </controller>
     <interface type='network'>
-      <mac address='<%= mac %>'/>
+      <% if mac %><mac address='<%= mac %>'/><% end %>
       <source network='vagrant'/>
       <model type='virtio'/>
     </interface>
