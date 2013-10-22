@@ -21,6 +21,7 @@ module VagrantPlugins
           b.use SetHostname
           #b.use Customize
           b.use Boot
+          b.use WaitForCommunicator, [:running]
           b.use ShareFolders
         end
       end
